@@ -1,7 +1,7 @@
 /************************************************************************
  * Name: config.c                                                       *
  * Author: Ilan Moreira Pegoraro <iemoreirap@gmail.com>                 *
- * Version 0.3                                                          *
+ * Version 0.4                                                          *
  *                                                                      *
  * Description: Configuration functions and structures                  *
  ***********************************************************************/
@@ -36,9 +36,7 @@
 #include <alpm.h>
 #include <alpm_list.h>
 
-#include "conf.h"
-#include "error.h"
-#include "util.h"
+#include "aum.h"
 
 #define MAXBUFFER 1024
 
@@ -374,15 +372,11 @@ _init(AumConfig *conf, GError **err)
 	if(conf->root == NULL)
 		conf->root = strdup(ROOTDIR);
 
-	if(conf->dbpath == NULL){
-		conf->dbpath = (char*) calloc(strlen(conf->root) + strlen(DBPATH) ,sizeof(char));
-		sprintf(conf->dbpath,"%s%s",conf->root, DBPATH);
-	}
+	if(conf->dbpath == NULL)
+		conf->dbpath = strdup(DBPATH);
 	
-	if(conf->logfile == NULL){
-		conf->logfile = (char*) calloc(strlen(conf->root) + strlen(LOGFILE) ,sizeof(char));
-		sprintf(conf->logfile,"%s%s",conf->root, LOGFILE);
-	}
+	if(conf->logfile == NULL)
+		conf->logfile = strdup(LOGFILE);
 
 	if(alpm_option_set_root(conf->root)) {
 		g_set_error(&error, AUM_CONFIG_ERROR, AUM_ERROR_EROOT, \

@@ -28,9 +28,14 @@ AM_CPPFLAGS = \
 	$(AUM_CFLAGS)
 
 aum_SOURCES = \
-	main.c \
+	aum.h \
+	aum.c \
 	conf.c \
 	conf.h \
+	sync.h \
+	sync.c \
+	main-window.h \
+	main-window.c \
 	util.c \
 	util.h \
 	error.h 
