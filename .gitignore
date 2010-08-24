@@ -1,9 +1,10 @@
 *.o
 *.bak
 *~
+Debug/
 configure
 autom4te.cache
-.anjuta/*
+.anjuta/
 .anjuta_sym_db.db
 aum.anjuta
 aclocal.m4
@@ -15,3 +16,4 @@ missing
 mkinstalldirs
 config.guess
 config.sub
+Makefile.in

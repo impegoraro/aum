@@ -20,7 +20,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
- 
+
+#ifndef _AUM_CONF_H_
+#define _AUM_CONF_H_
+
 #include <alpm_list.h>
 
 #include <glib/gerror.h>
@@ -56,3 +59,5 @@ unsigned short aum_release_alpm(GError **);
 void aum_config_free_inner(AumConfig*);
 
 GQuark aum_config_error();
+
+#endif

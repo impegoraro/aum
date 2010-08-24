@@ -95,7 +95,7 @@ aum_release_alpm(GError **err)
 }
 
 void 
-pkg_config_free_inner(AumConfig* c)
+aum_config_free_inner(AumConfig* c)
 {
 	alpm_list_t *i = NULL, *j = NULL;
 	void* data;
@@ -346,7 +346,7 @@ cleanup:
 		free(section);
 	/* undo conf if error occurs*/
 	if(!exit_code) 
-		pkg_config_free_inner(conf);
+		aum_config_free_inner(conf);
 	
 	return exit_code;
 }
