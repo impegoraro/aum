@@ -411,39 +411,12 @@ _init(AumConfig *conf, GError **err)
 			exit_code = 0;
 			goto cleanup;
 		}
-	}else{
-		/* Using the ones defined in the structure */ 
-		alpm_list_t *i;
-		for(i = conf->caches; i != NULL; i = alpm_list_next(i)) {
-			if(alpm_option_add_cachedir((char*) alpm_list_getdata(i))) {
-				g_set_error(&error, AUM_CONFIG_ERROR, AUM_ERROR_ECACHE, \
-							"unable to add the cache directory, Cause %s",alpm_strerrorlast());
-				g_propagate_error(err, error);
-				exit_code = 0;
-				goto cleanup;
-			}
-		}
-	}
-	if(conf->ignorePkg != NULL) {
-		alpm_list_t *i;
-		for(i = conf->ignorePkg; i != NULL; i = alpm_list_next(i))
-			alpm_option_add_ignorepkg((char*) alpm_list_getdata(i));
-	}
-	if(conf->ignoreGrp != NULL) {
-		alpm_list_t *i;
-		for(i = conf->ignoreGrp; i != NULL; i = alpm_list_next(i)) 
-			alpm_option_add_ignoregrp((char*) alpm_list_getdata(i));
-	}
-	if(conf->noUpgrade != NULL) {
-		alpm_list_t *i;
-		for(i = conf->noUpgrade; i != NULL; i = alpm_list_next(i)) 
-			alpm_option_add_noupgrade((char*) alpm_list_getdata(i));
-	}
-	if(conf->noExtract != NULL) {
-		alpm_list_t *i;
-		for(i = conf->noExtract; i != NULL; i = alpm_list_next(i))
-			alpm_option_add_noextract((char*) alpm_list_getdata(i));
-	}
+	}else
+		alpm_option_set_cachedirs(conf->caches); /* Using the ones defined in the structure */ 
+	alpm_option_set_ignorepkgs(conf->ignorePkg);
+	alpm_option_set_ignoregrps(conf->ignoreGrp);
+	alpm_option_set_noupgrades(conf->noUpgrade);
+	alpm_option_set_noextracts(conf->noExtract);
 
 	if(conf->repos != NULL){
 		alpm_list_t *i, *j;
