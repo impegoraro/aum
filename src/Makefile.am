@@ -19,7 +19,7 @@ DEFS = -DLOCALEDIR=\"@localedir@\" \
        -DCACHEDIR=\"$(cachedir)\" \
        -DLOGFILE=\"$(logfile)\" \
        @DEFS@
-AM_CFLAGS = -Wall -pedantic -lalpm -g -D_GNU_SOURCE
+AM_CFLAGS = -Wall -pedantic -lalpm -lpthread -g -D_GNU_SOURCE
 
 AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
@@ -36,6 +36,8 @@ aum_SOURCES = \
 	sync.c \
 	main-window.h \
 	main-window.c \
+	callbacks.h \
+	callbacks.c \
 	util.c \
 	util.h \
 	error.h 

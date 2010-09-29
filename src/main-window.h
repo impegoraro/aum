@@ -1,7 +1,7 @@
 /************************************************************************
  * Name: main-window.c                                                  *
  * Author: Ilan Moreira Pegoraro <iemoreirap@gmail.com>                 *
- * Version 0.1                                                          *
+ * Version 0.3                                                          *
  *                                                                      *
  * Description: User Interface                                          *
  ***********************************************************************/
@@ -28,6 +28,8 @@
 #include <gtk/gtklabel.h>
 #include <gtk/gtkbutton.h>
 #include <gtk/gtktreeview.h>
+#include <gtk/gtkbox.h>
+#include <gtk/gtkprogressbar.h>
 
 #define AUM_MAIN_WINDOW_ERROR aum_main_window_error_quark()
 
@@ -49,10 +51,15 @@ typedef struct {
 	GtkButton *btnRefresh;
 	GtkButton *btnClose;
 	GtkButton *btnInstall;
+	
+	GtkBox *boxAction;
+	GtkLabel *lblAction;
+	GtkProgressBar *pbarTransaction;
 } AumInterface;
 
 
-AumInterface* aum_interface_new(GError **err);
+AumInterface* aum_interface_new(GError**);
+void aum_listupgrades_fill(GtkTreeView*, alpm_list_t*);
 
 GQuark aum_main_window_error_quark();
 

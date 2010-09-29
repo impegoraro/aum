@@ -35,6 +35,7 @@ main(int argc, char *argv[])
 	int exit_code = EXIT_SUCCESS;
 	AumConfig conf;
 	AumInterface *aumUI;
+	alpm_list_t *lupkgs = NULL;
 	GError *err = NULL;
 
 	memset(&conf, 0, sizeof(conf));
@@ -60,7 +61,26 @@ main(int argc, char *argv[])
 		goto cleanup;
 	}
 
-	/*hanging over control to gtk main loop*/
+	if(aum_get_upgradablepkgs(&lupkgs, &err) < 0) {
+		printf("Error %s", err->message);
+		g_clear_error(&err);
+	}else {
+		char *text;
+		
+		if(lupkgs == NULL) {
+			text = g_markup_printf_escaped("<b>There are not new updates available for your system.</b>" \
+			                               "\n<small>you can check for updates at any given time.</small>");
+		}else{
+			text = g_markup_printf_escaped("<b>There're %d new available updates.</b>" \
+				                           "\n<small>select the packages that you want to install and " \
+					                       "then click on the \"install\" button.</small>",alpm_list_count(lupkgs));
+			aum_listupgrades_fill(aumUI->treeUpdates, lupkgs);
+			alpm_list_free(lupkgs);
+		}
+		gtk_label_set_markup(aumUI->lblTitle, text);
+		g_free(text);
+	}
+	/*hanging over control to gtk main loop*/ 
 	gtk_main();
 	
 cleanup:

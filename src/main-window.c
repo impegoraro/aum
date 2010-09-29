@@ -1,7 +1,7 @@
 /************************************************************************
  * Name: main-window.c                                                  *
  * Author: Ilan Moreira Pegoraro <iemoreirap@gmail.com>                 *
- * Version 0.1                                                          *
+ * Version 0.3                                                          *
  *                                                                      *
  * Description: User Interface                                          *
  ***********************************************************************/
@@ -31,18 +31,26 @@
 #include <gtk/gtkcellrenderertoggle.h>
 #include <gtk/gtkmain.h>
 
+#include <assert.h>
+
+#include <alpm.h>
+#include <alpm_list.h>
 
 #include <glib.h>
 #include <glib/gerror.h>
 #include <glib/gquark.h>
 
+#include <pthread.h>
+
+
 #include "aum.h"
+#include "sync.h"
 
 static void _on_renderer_toggle(GtkCellRendererToggle*, char*, GtkTreeModel*);
 static void _on_window_destroy(GtkWindow *window, gpointer data);
 static void _on_btnClose_clicked(GtkButton*, GtkWidget*);
 static gboolean _on_window_delete_event(GtkWindow*, GdkEvent*, gpointer);
-
+static void _on_btnRefresh_clicked(GtkButton*, AumInterface*);
 
 AumInterface*
 aum_interface_new(GError **err)
@@ -74,6 +82,10 @@ aum_interface_new(GError **err)
 	ui->btnRefresh = GTK_BUTTON(gtk_builder_get_object(builder, "btnRefresh"));
 	ui->btnClose = GTK_BUTTON(gtk_builder_get_object(builder, "btnClose"));
 	ui->btnInstall = GTK_BUTTON(gtk_builder_get_object(builder, "btnInstall"));
+	ui->boxAction = GTK_BOX(gtk_builder_get_object(builder, "boxAction"));
+	ui->lblAction = GTK_LABEL(gtk_builder_get_object(builder, "lblAction"));
+	ui->pbarTransaction = GTK_PROGRESS_BAR(gtk_builder_get_object(builder, "pbarTransaction"));
+
 
 	g_object_unref(G_OBJECT(builder)); /* there's no need to keep the reference to builder */
 
@@ -81,6 +93,7 @@ aum_interface_new(GError **err)
 	g_signal_connect(G_OBJECT(ui->window), "destroy", G_CALLBACK(_on_window_destroy), NULL);
 	g_signal_connect(G_OBJECT(ui->window), "delete_event", G_CALLBACK(_on_window_delete_event), NULL);
 	g_signal_connect(G_OBJECT(ui->btnClose), "clicked", G_CALLBACK(_on_btnClose_clicked), ui->window);
+	g_signal_connect(G_OBJECT(ui->btnRefresh), "clicked", G_CALLBACK(_on_btnRefresh_clicked), ui);
 	
 	/*setting properties to treeUpdates*/
 	model = gtk_list_store_new(AUM_LU_TOTAL, G_TYPE_BOOLEAN, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
@@ -107,16 +120,51 @@ aum_interface_new(GError **err)
 	g_object_set(G_OBJECT(column), "resizable", TRUE, NULL);
 	gtk_tree_view_append_column(ui->treeUpdates, column);
 
-	/*setting properties for window*/
+	/*setting properties on window*/
 	gtk_window_set_icon_from_file(ui->window, PACKAGE_ICON, NULL);
 	
-	/*setting properties for btnInstall*/
+	/*setting properties on btnInstall*/
 	gtk_widget_set_sensitive(GTK_WIDGET(ui->btnInstall), FALSE);
-
-	gtk_widget_show_all(GTK_WIDGET(ui->window));	/*showing all widgets*/
+	
+	gtk_widget_show_all(GTK_WIDGET(ui->window));
+	
 	return ui;
 }
 
+void
+aum_listupgrades_fill(GtkTreeView* tup, alpm_list_t* list)
+{
+	GtkListStore *model;
+	GtkTreeIter iter;
+	pmpkg_t *pkg;
+	char *str;
+	alpm_list_t *i;
+	
+	model = GTK_LIST_STORE(gtk_tree_view_get_model(tup));
+	if(model == NULL) return;
+	
+	gtk_list_store_clear(model);
+	for(i = list; i != NULL; i = alpm_list_next(i)) {
+		pkg = alpm_list_getdata(i);
+#ifdef HAVE_ASPRINTF
+		asprintf(str, "%0.1f MB", (alpm_pkg_get_size(pkg) / 1024.0 / 1024.0));
+#else 
+		{
+			int pkgsize = alpm_pkg_get_size(pkg) / 1024 / 1024, nchars = 0;
+			while(pkgsize > 0) {
+				pkgsize %= 10;
+				nchars++;
+			}
+			str = calloc(sizeof(char), nchars + 4);
+			sprintf(str, "%0.1f MB", (alpm_pkg_get_size(pkg) / 1024.0 / 1024.0));
+		}
+#endif
+		gtk_list_store_append(model, &iter);
+		gtk_list_store_set(model, &iter, AUM_LU_INSTALL, TRUE, AUM_LU_NAME, alpm_pkg_get_name(pkg), \
+						   AUM_LU_VERSION, alpm_pkg_get_version(pkg), AUM_LU_SIZE, str);
+		free(str);
+	}
+}
 
 GQuark 
 aum_main_window_error_quark()
@@ -157,4 +205,10 @@ _on_btnClose_clicked(GtkButton *btn, GtkWidget *widget)
 	g_signal_emit_by_name(G_OBJECT(widget), "delete_event", NULL, &res);
 	if(!res)
 		gtk_widget_destroy(widget);
+}
+
+static void
+_on_btnRefresh_clicked(GtkButton *btn, AumInterface *ui)
+{
+	aum_refresh_databases(ui);
 }
