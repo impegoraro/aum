@@ -21,6 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <gtk/gtkwindow.h>
 #include <gtk/gtklabel.h>
 #include <gtk/gtkbutton.h>
@@ -137,17 +141,19 @@ aum_listupgrades_fill(GtkTreeView* tup, alpm_list_t* list)
 	GtkListStore *model;
 	GtkTreeIter iter;
 	pmpkg_t *pkg;
-	char *str;
+	char *str = NULL;
 	alpm_list_t *i;
 	
 	model = GTK_LIST_STORE(gtk_tree_view_get_model(tup));
 	if(model == NULL) return;
-	
+
 	gtk_list_store_clear(model);
 	for(i = list; i != NULL; i = alpm_list_next(i)) {
-		pkg = alpm_list_getdata(i);
+		pkg = (pmpkg_t*) alpm_list_getdata(i);
+
 #ifdef HAVE_ASPRINTF
-		asprintf(str, "%0.1f MB", (alpm_pkg_get_size(pkg) / 1024.0 / 1024.0));
+		asprintf(&str, "%0.1f MB", (alpm_pkg_get_size(pkg) / 1024.0 / 1024.0));
+
 #else 
 		{
 			int pkgsize = alpm_pkg_get_size(pkg) / 1024 / 1024, nchars = 0;
@@ -161,7 +167,7 @@ aum_listupgrades_fill(GtkTreeView* tup, alpm_list_t* list)
 #endif
 		gtk_list_store_append(model, &iter);
 		gtk_list_store_set(model, &iter, AUM_LU_INSTALL, TRUE, AUM_LU_NAME, alpm_pkg_get_name(pkg), \
-						   AUM_LU_VERSION, alpm_pkg_get_version(pkg), AUM_LU_SIZE, str);
+						   AUM_LU_VERSION, alpm_pkg_get_version(pkg), AUM_LU_SIZE, str, -1);
 		free(str);
 	}
 }

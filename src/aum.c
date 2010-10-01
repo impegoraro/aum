@@ -66,16 +66,24 @@ main(int argc, char *argv[])
 		g_clear_error(&err);
 	}else {
 		char *text;
-		
+
 		if(lupkgs == NULL) {
 			text = g_markup_printf_escaped("<b>There are not new updates available for your system.</b>" \
 			                               "\n<small>you can check for updates at any given time.</small>");
+			gtk_widget_set_sensitive(GTK_WIDGET(aumUI->btnInstall), FALSE);
 		}else{
-			text = g_markup_printf_escaped("<b>There're %d new available updates.</b>" \
-				                           "\n<small>select the packages that you want to install and " \
-					                       "then click on the \"install\" button.</small>",alpm_list_count(lupkgs));
+			if(alpm_list_count(lupkgs) == 1) {
+				text = g_markup_printf_escaped("<b>There's %d new available updates.</b>" \
+					                           "\n<small>select the packages that you want to install and " \
+						                       "then click on the \"install\" button.</small>",alpm_list_count(lupkgs));
+			} else {
+				text = g_markup_printf_escaped("<b>There're %d new available updates.</b>" \
+					                           "\n<small>select the packages that you want to install and " \
+						                       "then click on the \"install\" button.</small>",alpm_list_count(lupkgs));
+			}
 			aum_listupgrades_fill(aumUI->treeUpdates, lupkgs);
 			alpm_list_free(lupkgs);
+			gtk_widget_set_sensitive(GTK_WIDGET(aumUI->btnInstall), TRUE);
 		}
 		gtk_label_set_markup(aumUI->lblTitle, text);
 		g_free(text);

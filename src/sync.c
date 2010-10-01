@@ -63,7 +63,7 @@ aum_get_upgradablepkgs(alpm_list_t** upkgs, GError** err)
 			uppkgs = alpm_list_add(uppkgs, (void *) spkg);
 		++hmany;
 	}
-	
+	*upkgs = uppkgs;
 	return hmany;
 }
 

@@ -27,6 +27,7 @@ GtkProgressBar *cb_download_pbar = NULL;
 void
 aum_cb_totaldl(off_t total)
 {
+	printf("%lu\n",total);
 }
 
 void
@@ -35,7 +36,6 @@ aum_cb_download(const char *filename, off_t xfered, off_t total)
 	char *text, *p;
 	gdouble res = (gdouble) ((gdouble) xfered / (gdouble) total);
 	
-	printf("xfered = %lu\ttotal = %lu\n",(long unsigned) xfered, (long unsigned) total);
 	if(cb_download_pbar != NULL) {
 		/*gtk_progress_bar_set_fraction(cb_download_pbar, res);*/
 		text = strdup(filename);
