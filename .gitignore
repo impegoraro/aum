@@ -4,9 +4,6 @@
 Debug/
 configure
 autom4te.cache
-.anjuta/
-.anjuta_sym_db.db
-aum.anjuta
 aclocal.m4
 depcomp
 INSTALL
